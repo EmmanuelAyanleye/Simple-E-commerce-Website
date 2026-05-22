@@ -60,7 +60,7 @@ Then open:
 
 ## Notes
 
-- WhatsApp number used throughout: `+2290161183934`
+- WhatsApp number used throughout: `+2349046908664`
 - Location: Porto-Novo, Benin Republic
 
 ## Customization

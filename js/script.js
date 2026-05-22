@@ -1,5 +1,5 @@
 (() => {
-  const WHATSAPP_NUMBER = "2290161183934";
+  const WHATSAPP_NUMBER = "2349046908664";
   const STORAGE_KEY = "chlyns_cart_v1";
   let MEMORY_CART = [];
 
@@ -1603,31 +1603,34 @@
           return `${i + 1}. ${x.name} x${x.qty} - ${money(lineTotal)}`;
         });
 
+        const safe = (v) => String(v || "-").trim() || "-";
+        const safeNote = (v) => {
+          const t = String(v || "").trim();
+          return t || "-";
+        };
+
         const msg = [
-          "Hello Chlyn’s Fragrance,",
+          "Hello Chlyn’s Fragrance, I would like to place an order.",
           "",
-          "I would like to place an order.",
+          "*CUSTOMER DETAILS*",
+          `Name: ${safe(name)}`,
+          `Phone: ${safe(phone)}`,
+          `Location: ${safe(location)}`,
           "",
-          "CUSTOMER DETAILS",
-          `Name: ${name || "-"}`,
-          `Phone: ${phone || "-"}`,
-          `Location: ${location || "-"}`,
-          "",
-          "ORDER DETAILS",
-          "",
+          "*ORDER DETAILS*",
           ...lines,
           "",
           `Subtotal: ${money(sub)}`,
           `Delivery Fee: ${money(del)}`,
-          `TOTAL: ${money(tot)}`,
           "",
-          "Additional Note:",
-          note || "-",
+          `*TOTAL: ${money(tot)}*`,
           "",
-          "Thank you.",
+          "*Additional Note:*",
+          `_${safeNote(note)}_`,
         ].join("\n");
 
-        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+        const encoded = encodeURIComponent(msg).replace(/%0A/g, "%0D%0A");
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`;
         window.location.href = url;
       });
     }
