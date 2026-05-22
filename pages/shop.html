@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop | Chlyn’s Fragrance</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="../css/style.css" />
+
+    <style>
+        body{background:#111111;color:#ffffff;}
+        [data-aos]{opacity:1 !important;transform:none !important;}
+    </style>
+</head>
+<body>
+    <nav id="mainNav" class="navbar navbar-expand-lg navbar-dark luxury-nav fixed-top">
+        <div class="container">
+            <a class="navbar-brand brand-mark" href="../index.html">Chlyn’s Fragrance</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="../index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="shop.html">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link position-relative" href="cart.html" aria-label="Cart">
+                            <i class="bi bi-bag"></i>
+                            <span id="cartCount" class="cart-badge">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="section-pad" style="padding-top:130px;">
+        <div class="container" data-aos="fade-up">
+            <div class="section-eyebrow">Shop</div>
+            <h1 class="section-title">Luxury Perfume Collection</h1>
+            <p class="section-desc">Use filters to find your signature — from fresh daily scents to bold oud statements.</p>
+        </div>
+    </header>
+
+    <section class="pb-5">
+        <div class="container">
+            <div class="row g-4">
+                <aside class="col-lg-3" data-aos="fade-up" data-aos-delay="60">
+                    <div style="border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);padding:18px; position:sticky; top:100px;">
+                        <div class="fw-semibold mb-3" style="font-family:'Playfair Display', serif;">Filters</div>
+
+                        <label class="form-label text-muted small">Search</label>
+                        <input id="shopSearch" type="text" class="form-control mb-3" placeholder="Search fragrances..." />
+
+                        <label class="form-label text-muted small">Category</label>
+                        <select id="shopCategory" class="form-select mb-3">
+                            <option value="all">All</option>
+                            <option value="men">Men’s Perfume</option>
+                            <option value="women">Women’s Perfume</option>
+                            <option value="unisex">Unisex</option>
+                            <option value="arabian">Arabian Fragrances</option>
+                            <option value="luxury">Luxury Collection</option>
+                        </select>
+
+                        <label class="form-label text-muted small">Sort</label>
+                        <select id="shopSort" class="form-select mb-3">
+                            <option value="featured">Featured</option>
+                            <option value="rating-desc">Top Rated</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                        </select>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label text-muted small">Min (₦)</label>
+                                <input id="priceMin" type="number" class="form-control" placeholder="0" min="0" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-muted small">Max (₦)</label>
+                                <input id="priceMax" type="number" class="form-control" placeholder="200000" min="0" />
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-muted small">Tip: You can share a filtered category link (e.g. Men, Women, Arabian).</div>
+                    </div>
+                </aside>
+
+                <div class="col-lg-9">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3" data-aos="fade-up" data-aos-delay="90">
+                        <div id="shopResults" class="text-muted small">Showing products</div>
+                        <div id="shopPaginationTop" class="shop-pagination"></div>
+                    </div>
+                    <div class="row g-4" id="shopGrid" data-aos="fade-up" data-aos-delay="110">
+                        <noscript>
+                            <div class="col-12">
+                                <div style="border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);padding:18px;">
+                                    <div class="fw-semibold" style="font-family:'Playfair Display', serif;">Products require JavaScript</div>
+                                    <div class="text-muted mt-2">Please enable JavaScript to view the product catalog and filters.</div>
+                                </div>
+                            </div>
+                        </noscript>
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card bg-transparent border-0 h-100">
+                                <div class="p-3" style="border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);box-shadow:0 14px 40px rgba(0,0,0,.35);">
+                                    <div class="ratio ratio-4x3" style="border-radius:16px; overflow:hidden;">
+                                        <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1200&q=80" alt="Dior Sauvage" style="width:100%; height:100%; object-fit:cover;" />
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="fw-semibold">Dior Sauvage</div>
+                                        <div class="text-muted small">Dior • Men</div>
+                                        <div class="d-flex gap-2 flex-wrap mt-3">
+                                            <a class="btn btn-gold btn-sm" href="product-details.html?id=sauvage"><i class="bi bi-box-arrow-up-right"></i> Details</a>
+                                            <button class="btn btn-outline-gold btn-sm" type="button" data-add-to-cart="sauvage"><i class="bi bi-bag-plus"></i> Add to Cart</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card bg-transparent border-0 h-100">
+                                <div class="p-3" style="border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);box-shadow:0 14px 40px rgba(0,0,0,.35);">
+                                    <div class="ratio ratio-4x3" style="border-radius:16px; overflow:hidden;">
+                                        <img src="https://images.unsplash.com/photo-1523292562811-8fa7962a78c8?auto=format&fit=crop&w=1200&q=80" alt="Baccarat Rouge 540" style="width:100%; height:100%; object-fit:cover;" />
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="fw-semibold">Baccarat Rouge 540</div>
+                                        <div class="text-muted small">MFK • Unisex</div>
+                                        <div class="d-flex gap-2 flex-wrap mt-3">
+                                            <a class="btn btn-gold btn-sm" href="product-details.html?id=br540"><i class="bi bi-box-arrow-up-right"></i> Details</a>
+                                            <button class="btn btn-outline-gold btn-sm" type="button" data-add-to-cart="br540"><i class="bi bi-bag-plus"></i> Add to Cart</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card bg-transparent border-0 h-100">
+                                <div class="p-3" style="border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);box-shadow:0 14px 40px rgba(0,0,0,.35);">
+                                    <div class="ratio ratio-4x3" style="border-radius:16px; overflow:hidden;">
+                                        <img src="https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=1200&q=80" alt="Bleu De Chanel" style="width:100%; height:100%; object-fit:cover;" />
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="fw-semibold">Bleu De Chanel</div>
+                                        <div class="text-muted small">Chanel • Men</div>
+                                        <div class="d-flex gap-2 flex-wrap mt-3">
+                                            <a class="btn btn-gold btn-sm" href="product-details.html?id=bleu"><i class="bi bi-box-arrow-up-right"></i> Details</a>
+                                            <button class="btn btn-outline-gold btn-sm" type="button" data-add-to-cart="bleu"><i class="bi bi-bag-plus"></i> Add to Cart</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4" data-aos="fade-up" data-aos-delay="140">
+                        <div id="shopPagination" class="shop-pagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="footer-brand">Chlyn’s Fragrance</div>
+                    <div class="footer-text">Luxury perfume selections curated for signature presence and premium gifting.</div>
+                    <div class="d-flex gap-3 mt-3">
+                        <a class="social" href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a class="social" href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a class="social" href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="footer-title">Quick Links</div>
+                    <a class="footer-link" href="../index.html">Home</a>
+                    <a class="footer-link" href="shop.html">Shop</a>
+                    <a class="footer-link" href="about.html">About</a>
+                    <a class="footer-link" href="contact.html">Contact</a>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="footer-title">Contact</div>
+                    <div class="footer-text">Porto-Novo, Benin Republic</div>
+                    <a class="footer-link" href="mailto:Charlineegblea02@gmail.com"><i class="bi bi-envelope"></i> Charlineegblea02@gmail.com</a>
+                    <a class="footer-link" href="https://wa.me/2290161183934" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> +2290161183934</a>
+                </div>
+                <div class="col-lg-3">
+                    <div class="footer-title">Store Hours</div>
+                    <div class="footer-text">Mon - Sat: 9:00am - 7:00pm</div>
+                    <div class="footer-text">Sun: By appointment</div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>© <span id="year"></span> Chlyn’s Fragrance. All rights reserved.</div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content luxury-modal">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="quickViewTitle">Quick View</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="quickViewBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <button id="themeToggle" class="float-theme" type="button" aria-label="Switch to light mode"><i class="bi bi-sun"></i></button>
+    <a class="float-whatsapp" href="https://wa.me/2290161183934" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><i class="bi bi-whatsapp"></i></a>
+    <button id="backToTop" class="back-to-top" aria-label="Back to top"><i class="bi bi-arrow-up"></i></button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="../js/script.js"></script>
+</body>
+</html>
