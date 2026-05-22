@@ -226,6 +226,9 @@ a{text-decoration:none;}
   font-weight:700;
 }
 
+ .brand-mark img{filter:drop-shadow(0 10px 24px rgba(0,0,0,.25));}
+ .footer-brand{display:flex; align-items:center; gap:10px;}
+
 [data-theme="light"] .brand-mark,
 [data-theme="light"] .navbar-brand{
   color:rgba(0,0,0,.92) !important;

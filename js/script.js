@@ -1,6 +1,15 @@
 (() => {
-  const WHATSAPP_NUMBER = "2349046908664";
+  let WHATSAPP_NUMBER = "2349046908664";
   const STORAGE_KEY = "chlyns_cart_v1";
+  const ADMIN_KEYS = {
+    products: "chlyns_admin_products_v1",
+    testimonials: "chlyns_admin_testimonials_v1",
+    reviews: "chlyns_admin_reviews_v1",
+    settings: "chlyns_admin_settings_v1",
+    homepage: "chlyns_admin_homepage_v1",
+    categories: "chlyns_admin_categories_v1",
+    gallery: "chlyns_admin_gallery_v1",
+  };
   let MEMORY_CART = [];
 
   const money = (n) => {
@@ -14,6 +23,109 @@
     } catch {
       return fallback;
     }
+  };
+
+  const readLsJson = (key, fallback) => {
+    try {
+      return safeJsonParse(localStorage.getItem(key), fallback);
+    } catch {
+      return fallback;
+    }
+  };
+
+  const normalizeWhatsappNumber = (raw) => {
+    const s = String(raw || "").trim();
+    const digits = s.replace(/[^0-9]/g, "");
+    return digits || "";
+  };
+
+  const applySettingsOverrides = () => {
+    const s = readLsJson(ADMIN_KEYS.settings, null);
+    if (!s || typeof s !== "object" || Array.isArray(s)) return;
+
+    const name = String(s.platformName || "").trim();
+    if (name) {
+      document.querySelectorAll(".brand-mark").forEach((el) => (el.textContent = name));
+      document.querySelectorAll(".footer-brand").forEach((el) => (el.textContent = name));
+    }
+
+    const logoUrl = String(s.logoUrl || "").trim();
+    if (logoUrl) {
+      const applyLogoToEl = (el, { size = 34 } = {}) => {
+        if (!el || el.getAttribute("data-logo-applied") === "1") return;
+
+        const label = name || String(el.textContent || "").trim() || "Logo";
+        const span = document.createElement("span");
+        span.textContent = label;
+
+        const img = document.createElement("img");
+        img.src = logoUrl;
+        img.alt = label;
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.style.height = `${size}px`;
+        img.style.width = `${size}px`;
+        img.style.objectFit = "contain";
+        img.style.borderRadius = "10px";
+        img.style.marginRight = "10px";
+        img.style.display = "inline-block";
+        img.style.verticalAlign = "middle";
+
+        el.textContent = "";
+        el.appendChild(img);
+        el.appendChild(span);
+        el.setAttribute("data-logo-applied", "1");
+      };
+
+      document.querySelectorAll(".brand-mark").forEach((el) => applyLogoToEl(el, { size: 34 }));
+      document.querySelectorAll(".footer-brand").forEach((el) => applyLogoToEl(el, { size: 42 }));
+
+      const ensureIcon = (rel) => {
+        const existing = document.querySelector(`link[rel='${rel}']`) || document.querySelector(`link[rel=\"${rel}\"]`);
+        if (existing) return existing;
+        const link = document.createElement("link");
+        link.rel = rel;
+        document.head.appendChild(link);
+        return link;
+      };
+
+      const ico = ensureIcon("icon");
+      ico.href = logoUrl;
+      const apple = ensureIcon("apple-touch-icon");
+      apple.href = logoUrl;
+    }
+
+    const wa = normalizeWhatsappNumber(s.whatsappNumber);
+    if (wa) {
+      WHATSAPP_NUMBER = wa;
+      document
+        .querySelectorAll('a[href*="wa.me/"]')
+        .forEach((a) => (a.href = a.href.replace(/wa\.me\/[0-9]+/i, `wa.me/${wa}`)));
+    }
+
+    const email = String(s.contactEmail || "").trim();
+    if (email) {
+      document
+        .querySelectorAll('a[href^="mailto:"]')
+        .forEach((a) => {
+          a.href = `mailto:${email}`;
+          if (a.textContent && a.textContent.includes("@")) a.textContent = email;
+        });
+    }
+
+    const address = String(s.address || "").trim();
+    if (address) {
+      document.querySelectorAll(".footer-text").forEach((el) => {
+        if (String(el.textContent || "").toLowerCase().includes("porto-novo")) el.textContent = address;
+      });
+    }
+
+    const ig = String(s.instagramUrl || "").trim();
+    if (ig) document.querySelectorAll('a.social[aria-label="Instagram"]').forEach((a) => (a.href = ig));
+    const fb = String(s.facebookUrl || "").trim();
+    if (fb) document.querySelectorAll('a.social[aria-label="Facebook"]').forEach((a) => (a.href = fb));
+    const tt = String(s.tiktokUrl || "").trim();
+    if (tt) document.querySelectorAll('a.social[aria-label="TikTok"]').forEach((a) => (a.href = tt));
   };
 
   const getCart = () => {
@@ -127,7 +239,7 @@
     if (el) el.textContent = String(count);
   };
 
-  const PRODUCTS = [
+  let PRODUCTS = [
     {
       id: "sauvage",
       name: "Dior Sauvage",
@@ -907,6 +1019,14 @@
     },
   ];
 
+  const applyProductOverrides = () => {
+    const override = readLsJson(ADMIN_KEYS.products, null);
+    if (!Array.isArray(override) || override.length === 0) return;
+    const ok = override.every((p) => p && typeof p === "object" && p.id && p.name && p.image);
+    if (!ok) return;
+    PRODUCTS = override;
+  };
+
   const findProduct = (id) => PRODUCTS.find((p) => p.id === id);
 
   const pagesPrefix = () => {
@@ -1094,17 +1214,31 @@
   const initHome = () => {
     const featured = document.getElementById("featuredGrid");
     if (featured) {
-      const picks = [...PRODUCTS]
-        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      const home = readLsJson(ADMIN_KEYS.homepage, null);
+      const ids = home && Array.isArray(home.featuredIds) ? home.featuredIds.filter(Boolean) : [];
+      const selected = ids
+        .map((id) => PRODUCTS.find((p) => String(p.id) === String(id)))
+        .filter(Boolean)
         .slice(0, 6);
+      const picks =
+        selected.length > 0
+          ? selected
+          : [...PRODUCTS].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6);
       featured.innerHTML = picks.map((p) => productCardHtml(p, { compact: true })).join("");
     }
 
     const bestWrapper = document.getElementById("bestSellersWrapper");
     if (bestWrapper) {
-      const best = [...PRODUCTS]
-        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      const home = readLsJson(ADMIN_KEYS.homepage, null);
+      const ids = home && Array.isArray(home.bestSellerIds) ? home.bestSellerIds.filter(Boolean) : [];
+      const selected = ids
+        .map((id) => PRODUCTS.find((p) => String(p.id) === String(id)))
+        .filter(Boolean)
         .slice(0, 12);
+      const best =
+        selected.length > 0
+          ? selected
+          : [...PRODUCTS].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 12);
 
       bestWrapper.innerHTML = best
         .map(
@@ -1152,13 +1286,73 @@
       }
     }
 
+    const renderHomeCategories = () => {
+      const cats = readLsJson(ADMIN_KEYS.categories, null);
+      if (!Array.isArray(cats) || cats.length === 0) return;
+
+      const row = Array.from(document.querySelectorAll(".section-eyebrow"))
+        .find((el) => String(el.textContent || "").trim().toLowerCase() === "categories")
+        ?.closest(".container")
+        ?.querySelector(".row.g-4");
+
+      if (!row) return;
+
+      row.innerHTML = cats
+        .filter((c) => c && typeof c === "object" && c.key && c.title && c.image)
+        .map((c, idx) => {
+          const key = String(c.key || "").trim();
+          const title = String(c.title || "").trim();
+          const subtitle = String(c.subtitle || "").trim();
+          const img = String(c.image || "").trim();
+          const linkCat = String(c.linkCategory || "").trim() || key;
+          const col = idx < 3 ? "col-md-6 col-lg-4" : "col-md-6 col-lg-6";
+          return `
+            <div class="${col}" data-aos="fade-up" data-aos-delay="${60 + (idx % 3) * 50}">
+              <a class="cat-tile" href="pages/shop.html?category=${encodeURIComponent(linkCat)}">
+                <div class="cat-tile-bg" style="background-image:url('${img}');"></div>
+                <div class="cat-tile-ov"></div>
+                <div class="cat-tile-body">
+                  <div class="cat-tile-title">${title}</div>
+                  <div class="cat-tile-sub">${subtitle}</div>
+                </div>
+              </a>
+            </div>
+          `.trim();
+        })
+        .join("");
+    };
+
+    const renderHomeGallery = () => {
+      const imgs = readLsJson(ADMIN_KEYS.gallery, null);
+      if (!Array.isArray(imgs) || imgs.length === 0) return;
+
+      const row = Array.from(document.querySelectorAll(".section-eyebrow"))
+        .find((el) => String(el.textContent || "").trim().toLowerCase() === "gallery")
+        ?.closest(".container")
+        ?.querySelector(".row.g-3");
+
+      if (!row) return;
+
+      row.innerHTML = imgs
+        .filter(Boolean)
+        .slice(0, 12)
+        .map(
+          (src) =>
+            `<div class="col-6 col-md-4 col-lg-3"><div class="ig-tile" style="background-image:url('${String(src)}');"></div></div>`
+        )
+        .join("");
+    };
+
+    renderHomeCategories();
+    renderHomeGallery();
+
     const testiRow = document.getElementById("testimonialRow");
     if (testiRow) {
       const prev = document.getElementById("testiPrev");
       const next = document.getElementById("testiNext");
       const count = document.getElementById("testiCount");
 
-      const TESTIMONIALS = [
+      const DEFAULT_TESTIMONIALS = [
         {
           stars: "★★★★★",
           quote: "“The scent is premium and long-lasting. Great recommendation.”",
@@ -1190,6 +1384,13 @@
           author: "— Sarah, Porto-Novo",
         },
       ];
+
+      const tOverride = readLsJson(ADMIN_KEYS.testimonials, null);
+      const overrideOk =
+        Array.isArray(tOverride) &&
+        tOverride.length > 0 &&
+        tOverride.every((x) => x && typeof x === "object" && x.quote && x.author);
+      const TESTIMONIALS = overrideOk ? tOverride : DEFAULT_TESTIMONIALS;
 
       const PAGE_SIZE = 3;
       let page = 0;
@@ -1331,7 +1532,7 @@
     const rTotal = document.getElementById("pdReviewTotal");
 
     if (reviewsRoot) {
-      const REVIEWS = [
+      const DEFAULT_REVIEWS = [
         { stars: 5, text: "Lasts long and smells expensive.", who: "Verified Customer" },
         { stars: 5, text: "Fast response and premium packaging.", who: "Verified Customer" },
         { stars: 5, text: "Perfect for compliments — strong but not choking.", who: "Verified Buyer" },
@@ -1340,6 +1541,14 @@
         { stars: 4, text: "Good projection and long lasting.", who: "Verified Customer" },
         { stars: 5, text: "Exactly what I wanted. Great recommendation.", who: "Verified Buyer" },
       ];
+
+      const all = readLsJson(ADMIN_KEYS.reviews, null);
+      const candidate = all && p && p.id ? all[String(p.id)] : null;
+      const overrideOk =
+        Array.isArray(candidate) &&
+        candidate.length > 0 &&
+        candidate.every((r) => r && typeof r === "object" && r.text);
+      const REVIEWS = overrideOk ? candidate : DEFAULT_REVIEWS;
 
       const PAGE = 3;
       let page = 1;
@@ -1692,6 +1901,8 @@
   const initPage = () => {
     setYear();
     updateCartCount();
+    applySettingsOverrides();
+    applyProductOverrides();
     initNavEffects();
     initThemeToggle();
     hideLoader();
