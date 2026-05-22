@@ -37,11 +37,61 @@
     updateCartCount();
   };
 
+  const getToastContainer = () => {
+    const id = "cartToastContainer";
+    let el = document.getElementById(id);
+    if (el) return el;
+
+    el = document.createElement("div");
+    el.id = id;
+    el.className = "cart-toast-container toast-container position-fixed";
+    el.setAttribute("aria-live", "polite");
+    el.setAttribute("aria-atomic", "true");
+    document.body.appendChild(el);
+    return el;
+  };
+
+  const showAddToCartToast = (product, qtyAdded = 1) => {
+    if (!product) return;
+    if (!document || !document.body) return;
+
+    const bs = window.bootstrap;
+    if (!bs || !bs.Toast) return;
+
+    const container = getToastContainer();
+    const toastEl = document.createElement("div");
+    toastEl.className = "toast cart-toast";
+    toastEl.setAttribute("role", "status");
+    toastEl.setAttribute("aria-live", "polite");
+    toastEl.setAttribute("aria-atomic", "true");
+
+    const img = String(product.image || "");
+    const name = String(product.name || "Product");
+    const qtyText = Number(qtyAdded || 1) > 1 ? `x${Number(qtyAdded || 1)}` : "";
+
+    toastEl.innerHTML = `
+      <div class="toast-body d-flex gap-3 align-items-center">
+        <img class="cart-toast-img" src="${img}" alt="${name}">
+        <div class="flex-grow-1">
+          <div class="cart-toast-title">Added to cart</div>
+          <div class="cart-toast-sub">${name} ${qtyText}</div>
+        </div>
+        <button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `.trim();
+
+    container.appendChild(toastEl);
+    const toast = bs.Toast.getOrCreateInstance(toastEl, { delay: 3000, autohide: true });
+    toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
+    toast.show();
+  };
+
   const addToCart = (product, qty = 1) => {
+    const addQty = Math.max(1, Number(qty || 1));
     const cart = getCart();
     const idx = cart.findIndex((x) => x.id === product.id);
     if (idx >= 0) {
-      cart[idx].qty = Math.max(1, Number(cart[idx].qty || 1) + Number(qty || 1));
+      cart[idx].qty = Math.max(1, Number(cart[idx].qty || 1) + addQty);
     } else {
       cart.push({
         id: product.id,
@@ -49,10 +99,11 @@
         brand: product.brand,
         price: product.price,
         image: product.image,
-        qty: Math.max(1, Number(qty || 1)),
+        qty: addQty,
       });
     }
     setCart(cart);
+    showAddToCartToast(product, addQty);
   };
 
   const removeFromCart = (id) => {
@@ -1527,21 +1578,21 @@
         root.innerHTML = cart
           .map(
             (x) => `
-          <div class="d-flex gap-3 align-items-center py-3" style="border-bottom:1px solid rgba(255,255,255,.08)">
-            <div style="width:86px; height:86px; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,.12)">
+          <div class="cart-item-row d-flex gap-3 align-items-center py-3" style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <div class="cart-item-img" style="width:86px; height:86px; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,.12)">
               <img src="${x.image}" alt="${x.name}" style="width:100%; height:100%; object-fit:cover" />
             </div>
-            <div class="flex-grow-1">
+            <div class="cart-item-info flex-grow-1">
               <div class="fw-semibold">${x.name}</div>
               <div class="text-muted small">${x.brand || ""}</div>
               <div class="mt-1" style="color:rgba(212,175,55,.95)">${money(x.price)}</div>
             </div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="cart-item-qty d-flex align-items-center gap-2">
               <button class="btn btn-sm btn-outline-light" data-qty-minus="${x.id}" aria-label="Decrease">-</button>
               <div style="min-width:34px; text-align:center">${x.qty}</div>
               <button class="btn btn-sm btn-outline-light" data-qty-plus="${x.id}" aria-label="Increase">+</button>
             </div>
-            <div class="text-end" style="min-width:130px">
+            <div class="cart-item-totals text-end">
               <div class="fw-semibold">${money(Number(x.price) * Number(x.qty))}</div>
               <button class="btn btn-sm btn-outline-gold mt-2" data-remove-item="${x.id}"><i class="bi bi-trash"></i> Remove</button>
             </div>

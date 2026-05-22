@@ -263,9 +263,14 @@ a{text-decoration:none;}
 }
 
 [data-theme="light"] .navbar-toggler{border-color:rgba(0,0,0,.18);}
+[data-theme="light"] .navbar-dark .navbar-toggler-icon{filter:invert(1) grayscale(1) brightness(.25);}
 
  .navbar-toggler{border-color:rgba(255,255,255,.18);}
  .navbar-toggler:focus{box-shadow:0 0 0 .20rem rgba(212,175,55,.12);}
+
+.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon{
+  background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(212,175,55,0.95)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M7 7 L23 23 M23 7 L7 23'/%3e%3c/svg%3e");
+}
 
 .cart-badge{
   position:absolute;
@@ -282,6 +287,43 @@ a{text-decoration:none;}
   color:#111;
   background:var(--gold);
 }
+
+.cart-toast-container{
+  top:86px;
+  right:16px;
+  z-index:9999;
+}
+.cart-toast{
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(17,17,17,.92);
+  color:#fff;
+  box-shadow:0 18px 45px rgba(0,0,0,.45);
+  backdrop-filter:blur(10px);
+}
+.cart-toast .btn-close{filter:invert(1) grayscale(1) brightness(2);}
+.cart-toast-img{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  object-fit:cover;
+  border:1px solid rgba(212,175,55,.30);
+}
+.cart-toast-title{font-weight:700; letter-spacing:.2px;}
+.cart-toast-sub{font-size:.92rem; opacity:.92;}
+
+.cart-item-row{min-width:0;}
+.cart-item-info{min-width:0;}
+.cart-item-totals{min-width:0;}
+.cart-item-totals .btn{white-space:nowrap;}
+
+[data-theme="light"] .cart-toast{
+  background:rgba(255,255,255,.96);
+  color:rgba(0,0,0,.86);
+  border:1px solid rgba(0,0,0,.12);
+  box-shadow:0 16px 40px rgba(0,0,0,.18);
+}
+[data-theme="light"] .cart-toast .btn-close{filter:none;}
 
 /* Hero */
 .hero{
@@ -845,6 +887,30 @@ a{text-decoration:none;}
   .footer{padding:56px 0 26px;}
   .footer .row{row-gap:22px;}
   .social{width:40px;height:40px;border-radius:14px;}
+
+  [data-theme="light"] .navbar-dark .navbar-nav .nav-link.active:after{display:none;}
+
+  .navbar-nav a.nav-link[aria-label="Cart"]{
+    display:inline-flex;
+    align-items:center;
+    width:max-content;
+    padding-right:10px;
+  }
+
+  .cart-badge{
+    top:-5px;
+    right:-8px;
+  }
+  .cart-toast-container{right:12px; left:12px;}
+
+  .cart-item-row{
+    flex-wrap:wrap;
+    align-items:flex-start !important;
+  }
+  .cart-item-img{width:72px !important; height:72px !important;}
+  .cart-item-qty{order:3; width:100%; justify-content:flex-start;}
+  .cart-item-totals{order:4; width:100%; text-align:left !important; margin-top:6px;}
+  .cart-item-totals .btn{width:max-content;}
 
   /* On small screens, remove overlap so cards never collide */
   .hero{padding-top:88px;}
